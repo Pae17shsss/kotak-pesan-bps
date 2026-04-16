@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kotak Penitipan Salam — BPS Kabupaten Bangka</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --cream:  #fdf8f3;
+      --pink:   #fce8e4;
+      --rose:   #f2a99a;
+      --navy:   #2b3a52;
+      --slate:  #5a6a82;
+      --mid:    #8a9bb5;
+      --light:  #c8d5e8;
+      --white:  #ffffff;
+      --shadow: rgba(43,58,82,.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─── floating deco ─────────────────────────────────── */
+    .deco {
+      position: fixed;
+      pointer-events: none;
+      opacity: .18;
+      font-size: 2rem;
+      animation: floatDeco 6s ease-in-out infinite;
+    }
+    .deco:nth-child(1){ top: 7%;  left: 5%;  animation-delay: 0s;   }
+    .deco:nth-child(2){ top: 12%; right: 7%; animation-delay: 1.5s; font-size:1.6rem; }
+    .deco:nth-child(3){ bottom:15%; left:8%; animation-delay: 0.8s; font-size:1.4rem; }
+    .deco:nth-child(4){ bottom:10%; right:6%;animation-delay: 2.3s; font-size:2.2rem; }
+    @keyframes floatDeco {
+      0%,100%{ transform: translateY(0) rotate(0deg); }
+      50%    { transform: translateY(-12px) rotate(6deg); }
+    }
+
+    /* ─── card ──────────────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 40px 48px 36px;
+      max-width: 620px;
+      width: 92vw;
+      box-shadow: 0 8px 40px var(--shadow);
+      position: relative;
+      z-index: 10;
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── header ────────────────────────────────────────── */
+    .card-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .card-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      color: var(--navy);
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+    .card-header p {
+      font-size: .78rem;
+      color: var(--mid);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ─── NIP input row ─────────────────────────────────── */
+    .nip-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .nip-row .icon-sm { font-size: 1.1rem; color: var(--mid); }
+    .nip-row input {
+      border: 1.5px solid var(--light);
+      border-radius: 30px;
+      padding: 8px 20px;
+      font-family: 'Lato', sans-serif;
+      font-size: .9rem;
+      color: var(--navy);
+      background: var(--cream);
+      outline: none;
+      width: 220px;
+      transition: border .2s;
+    }
+    .nip-row input:focus { border-color: var(--rose); }
+    .nip-row input::placeholder { color: var(--mid); }
+
+    /* ─── envelope area ─────────────────────────────────── */
+    #envelope-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* ─── ENVELOPE ──────────────────────────────────────── */
+    .envelope-wrap {
+      cursor: default;
+      position: relative;
+      width: 160px;
+      height: 110px;
+      margin-bottom: 10px;
+    }
+    .envelope-wrap.can-open { cursor: pointer; }
+    .envelope-wrap.can-open:hover .env-body { transform: translateY(-3px); }
+
+    /* envelope body */
+    .env-body {
+      position: absolute;
+      inset: 0;
+      background: var(--light);
+      border-radius: 6px;
+      box-shadow: 0 4px 18px var(--shadow);
+      transition: transform .2s;
+      overflow: hidden;
+    }
+
+    /* flap — CLOSED */
+    .env-flap {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 55%;
+      background: var(--mid);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+      transition: transform .6s cubic-bezier(.4,0,.2,1), background .3s;
+      z-index: 3;
+    }
+    .envelope-wrap.can-open .env-flap { background: var(--rose); }
+    .envelope-wrap.opening .env-flap {
+      transform: rotateX(-180deg);
+      background: var(--rose);
+    }
+
+    /* left & right triangles */
+    .env-left, .env-right, .env-bottom {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 50%; height: 100%;
+      background: var(--light);
+      filter: brightness(.93);
+      clip-path: polygon(0 0,0 100%,100% 100%);
+      z-index: 2;
+    }
+    .env-right { left: auto; right: 0; clip-path: polygon(100% 0,0 100%,100% 100%); }
+    .env-bottom { width: 100%; clip-path: polygon(0 100%,100% 100%,50% 45%); filter: brightness(.88); }
+
+    /* letter peeking out */
+    .env-letter {
+      position: absolute;
+      left: 20px; right: 20px;
+      bottom: 14px;
+      background: var(--white);
+      border-radius: 4px;
+      height: 60px;
+      z-index: 1;
+      transform: translateY(0);
+      opacity: 0;
+      transition: transform .5s .3s ease, opacity .4s .3s;
+    }
+    .envelope-wrap.opening .env-letter {
+      transform: translateY(-42px);
+      opacity: 1;
+    }
+
+    /* hint text */
+    .env-hint {
+      font-size: .72rem;
+      color: var(--mid);
+      letter-spacing: .6px;
+      margin-top: 6px;
+      min-height: 18px;
+      transition: opacity .3s;
+    }
+
+    /* ─── LETTER PANEL ──────────────────────────────────── */
+    #letter-panel {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      animation: slideUp .5s ease;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .recipient-label {
+      text-align: center;
+      font-size: .75rem;
+      color: var(--mid);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .recipient-name {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: var(--navy);
+      margin-bottom: 18px;
+    }
+
+    /* letter card */
+    .letter-card {
+      background: var(--pink);
+      border-radius: 14px;
+      padding: 22px 24px 18px;
+      min-height: 130px;
+      position: relative;
+      margin-bottom: 14px;
+      animation: fadeMsg .4s ease;
+    }
+    @keyframes fadeMsg {
+      from { opacity:0; transform:scale(.97); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    .letter-card .msg {
+      font-size: .92rem;
+      line-height: 1.7;
+      color: var(--navy);
+      white-space: pre-wrap;
+    }
+    .letter-card .sender {
+      margin-top: 14px;
+      font-size: .75rem;
+      color: var(--slate);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .letter-card .sender::before { content: '✈'; font-size: .8rem; }
+
+    /* counter & nav */
+    .nav-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .counter {
+      font-size: .8rem;
+      color: var(--mid);
+      letter-spacing: .5px;
+    }
+    .btn {
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 30px;
+      padding: 8px 22px;
+      font-family: 'Lato', sans-serif;
+      font-size: .82rem;
+      cursor: pointer;
+      letter-spacing: .5px;
+      transition: background .2s, transform .1s;
+    }
+    .btn:hover { background: var(--slate); }
+    .btn:active { transform: scale(.97); }
+    .btn.ghost {
+      background: transparent;
+      color: var(--slate);
+      border: 1.5px solid var(--light);
+    }
+    .btn.ghost:hover { background: var(--cream); }
+
+    /* ─── footer ────────────────────────────────────────── */
+    footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 28px;
+      font-size: .72rem;
+      color: var(--mid);
+      letter-spacing: .6px;
+    }
+
+    /* ─── no-message state ──────────────────────────────── */
+    .no-msg {
+      text-align: center;
+      padding: 20px 0 10px;
+      color: var(--mid);
+      font-size: .88rem;
+    }
+
+    /* ─── dots ──────────────────────────────────────────── */
+    .dots {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--light);
+      transition: background .3s;
+    }
+    .dot.active { background: var(--navy); }
+  </style>
+</head>
+<body>
+
+<!-- floating decor -->
+<span class="deco">✉</span>
+<span class="deco">💌</span>
+<span class="deco">✈</span>
+<span class="deco">📬</span>
+
+<div class="card">
+
+  <!-- header -->
+  <div class="card-header">
+    <h1>Kotak Penitipan Salam</h1>
+    <p>Edisi Triwulan I &nbsp;·&nbsp; BPS Kabupaten Bangka</p>
+  </div>
+
+  <!-- NIP input -->
+  <div class="nip-row">
+    <span class="icon-sm">✉</span>
+    <input id="nipInput" type="text" placeholder="Masukkan NIP (lama) BPS :" autocomplete="off" />
+    <span class="icon-sm">✉</span>
+  </div>
+
+  <!-- envelope / letter area -->
+  <div id="envelope-area">
+
+    <!-- ENVELOPE (shown before open) -->
+    <div id="envelope-wrap" class="envelope-wrap" onclick="tryOpen()">
+      <div class="env-body">
+        <div class="env-flap"></div>
+        <div class="env-left"></div>
+        <div class="env-right"></div>
+        <div class="env-bottom"></div>
+        <div class="env-letter"></div>
+      </div>
+    </div>
+    <div class="env-hint" id="envHint">Masukkan NIP untuk membuka surat ✨</div>
+
+    <!-- LETTER PANEL (shown after open) -->
+    <div id="letter-panel">
+      <div class="recipient-label">Pesan untuk</div>
+      <div class="recipient-name" id="recipientName">—</div>
+
+      <div class="letter-card">
+        <div class="msg" id="msgText"></div>
+        <div class="sender" id="msgSender"></div>
+      </div>
+
+      <div class="dots" id="dots"></div>
+
+      <div class="nav-row">
+        <button class="btn ghost" onclick="prevMsg()">← Sebelumnya</button>
+        <span class="counter" id="counter">1 / 1</span>
+        <button class="btn" onclick="nextMsg()">Selanjutnya →</button>
+      </div>
+    </div>
+
+  </div><!-- /envelope-area -->
+</div><!-- /card -->
+
+<footer>
+  <span>Edisi Triwulan I</span>
+  <span>BPS Kabupaten Bangka</span>
+</footer>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const DATA = [{"Pengirim":"Budi Utama, SST.","Penerima":"Akhmad Pasa, S.T.","Tuliskan Apresiasimu":"Terima kasih pak pasa, sudah membantu dalam kegiatan kegiatan teknis statistik produksi terutama sebagai penanggung jawab LPTB","NIP":"340017526"},{"Pengirim":"-","Penerima":"Akhmad Pasa, S.T.","Tuliskan Apresiasimu":"Makasih sudah saling bantu dan support dalam tim 💪","NIP":"340017526"},{"Pengirim":"Pratama Maesza, SST, M.Han.","Penerima":"Akhmad Pasa, S.T.","Tuliskan Apresiasimu":"Terima kasih bang Pasa..lah dibantu keliling-keliling pembinaan statistik sektoral ke OPD..","NIP":"340017526"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Akhmad Pasa, S.T.","Tuliskan Apresiasimu":"Makasih buah bacang e bang hahahaha","NIP":"340017526"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Arief Sumartio","Tuliskan Apresiasimu":"Terimakasih bang la bantu tiara ambil konsumsi, semangaaat","NIP":"340064249"},{"Pengirim":"Filmon Kharismartin Silaen, A.Md.Stat.","Penerima":"Audrey, A.Md.Stat.","Tuliskan Apresiasimu":"Audrey merupakan CA yang luar biasa bagi kelangsungan kantor 1901. Semoga Audrey sehat selalu dan menjadi CA tembus BPS pusat😄✋🏻","NIP":"340063060"},{"Pengirim":"Pratama Maesza, SST, M.Han.","Penerima":"Audrey, A.Md.Stat.","Tuliskan Apresiasimu":"Makasih Audrey sudah sosialisasi BERARTInya","NIP":"340063060"},{"Pengirim":"Santy Fajaria, SST, MT.","Penerima":"Audrey, A.Md.Stat.","Tuliskan Apresiasimu":"Terimakasih sudah memberikan program perubahan yang menggerakkan pegawai ke arah yang lebih baik","NIP":"340063060"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Audrey, A.Md.Stat.","Tuliskan Apresiasimu":"Terimakasih telah mengisi bangku kosong dan mewarnai keceriaan di ruangan kecil ini, semoga kita bisa bekerja sama dengan baik ke depannya","NIP":"340063060"},{"Pengirim":"-","Penerima":"Audrey, A.Md.Stat.","Tuliskan Apresiasimu":"Makasih masih mau bantuin humas 🫰🫰","NIP":"340063060"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Audrey, A.Md.Stat.","Tuliskan Apresiasimu":"Berkinerjalah Semaksimal dan Push sampe Limit dek... InsyaAllah gk ada yang sia2...\nSikap mu Hari ini akan menentukan kondisi Kamu mendatang...Trust me...","NIP":"340063060"},{"Pengirim":"-","Penerima":"Bayu Firdaus, S.Mn.","Tuliskan Apresiasimu":"Teman-teman semua, saya benar-benar ingin mengucapkan terima kasih yang sebesar-besarnya. Saya tahu perjalanan kita tidak selalu mudah, kadang capek, kadang penuh tekanan, bahkan ada momen yang bikin kita harus ekstra sabar. Saya sangat menghargai setiap usaha, tenaga, dan waktu yang kalian curahkan. Jujur saya bangga bisa satu tim dengan kalian, karena kekompakan dan semangat kalian itu luar biasa.","NIP":"340017525"},{"Pengirim":"-","Penerima":"Berlian Sitorus, S.Si, M.E.","Tuliskan Apresiasimu":"Makasih Pak udah jadi narasumber kemiskinan kemarin","NIP":"340016900"},{"Pengirim":"-","Penerima":"Budi Utama, SST.","Tuliskan Apresiasimu":"Terimakasih pak Budi sudah pengertian dan bantu dalam kegiatan ku selama ini.","NIP":"340056753"},{"Pengirim":"-","Penerima":"Budi Utama, SST.","Tuliskan Apresiasimu":"Kerjaan banyak tapi keliatannya ga pusing walau aslinya puyeng 😆 Makasih dah saling support 💪","NIP":"340056753"},{"Pengirim":"-","Penerima":"Budi Utama, SST.","Tuliskan Apresiasimu":"Terimakasih pak Ketua Tim Produksi atas arahan dan kerjasamanya dalam membantu menyelesaikan kegiatan saya selama ini. Semoga sehat dan sukses selalu. Aamiin.","NIP":"340056753"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Budi Utama, SST.","Tuliskan Apresiasimu":"Terimakasih bang atas kerjasamanya, jangan lupa ikut sertifikasi PPK ulang hahahah","NIP":"340056753"},{"Pengirim":"Ruli Ikhwani, SE.","Penerima":"Darussalam, S. Mn.","Tuliskan Apresiasimu":"Trimakasih atas support dan kerjasamanya serta masukan dalam penyelesaian tugas dan tanggung jawab pekerjaan di Distribusi ","NIP":"340017741"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Dian Ariewidayanti, S.ST.","Tuliskan Apresiasimu":"Terima kasih ya Bu udah jadi mentor selama latsar dan ketua tim pertama Audrey. Selamat juga udah di tim yang baru, semoga betah ya Bu😅😅","NIP":"340053199"},{"Pengirim":"-","Penerima":"Duan Ardiyansyah Dirgantara","Tuliskan Apresiasimu":"Terimakasih Duan sudah membantu dalam kegiatan survei bapak","NIP":"duan"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Duan Ardiyansyah Dirgantara","Tuliskan Apresiasimu":"Terimakasih kurir pos ku wkwkwk","NIP":"duan"},{"Pengirim":"-","Penerima":"Duan Ardiyansyah Dirgantara","Tuliskan Apresiasimu":"Terimakasih Duan atas bantuan dan kerjasamanya dalam kelancaran kegiatan saya di BPS.semoga sehat dan sukses selalu, aamiin.","NIP":"duan"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Eko Susanto","Tuliskan Apresiasimu":"Terimakasih bang la nganti tiara ke Bank atau kemana pun, semangaaat","NIP":"340064510"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Eko Susanto","Tuliskan Apresiasimu":"Semangat Tak Pernah Padam, Putus Asa tidak ada dalam Kamus mu...\nTerus semangat dan selalu memberikan yang terbaik untuk BPS abgqoe....!!!!","NIP":"340064510"},{"Pengirim":"Pratama Maesza, SST, M.Han.","Penerima":"Filmon Kharismartin Silaen, A.Md.Stat.","Tuliskan Apresiasimu":"Makasih Filmon lah dibuatkan BAST Wireless Headphones nya :)","NIP":"340063174"},{"Pengirim":"Berlian Sitorus, S.Si, M.E.","Penerima":"Filmon Kharismartin Silaen, A.Md.Stat.","Tuliskan Apresiasimu":"Trims, Grafiknya bisa dibuat. ","NIP":"340063174"},{"Pengirim":"-","Penerima":"Filmon Kharismartin Silaen, A.Md.Stat.","Tuliskan Apresiasimu":"Terimakasih banyak Filmon atas kerja sat set nya,,, pilihan tepat memilih Filmon sebagai operator BMN ","NIP":"340063174"},{"Pengirim":"-","Penerima":"Filmon Kharismartin Silaen, A.Md.Stat.","Tuliskan Apresiasimu":"Kita lupa tapi kita bisa 😆 Jangan sampai ada critical moment lainnya, makasehh Mon!! 😄💪","NIP":"340063174"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Filmon Kharismartin Silaen, A.Md.Stat.","Tuliskan Apresiasimu":"Terimakasih telah menjadi teman \"NGAKAK\" di tengah2 kesibukan kerja ini","NIP":"340063174"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Filmon Kharismartin Silaen, A.Md.Stat.","Tuliskan Apresiasimu":"Mon thank uu ya udah jadi bestie suka dukaku. Thank u juga karena sering nge back up kerjaan-kerjaan humasku. Filmon for IST 2026🙂‍↕️🙂‍↕️ Btw ku suka kalau kau la mimpin foto apalagi kalo la jadi pengarah gaya dadakan wkwkwk.","NIP":"340063174"},{"Pengirim":"Berlian Sitorus, S.Si, M.E.","Penerima":"Friliko Wira Mandala Putra, S.E.","Tuliskan Apresiasimu":"Trims sudah mengingatkan jadwal. 😇","NIP":"340064623"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Friliko Wira Mandala Putra, S.E.","Tuliskan Apresiasimu":"Terimakasih bang la bantu tiara siapin konsumsi, semangaaat","NIP":"340064623"},{"Pengirim":"Budi Utama, SST.","Penerima":"Mardian Zahdi, A.Md.","Tuliskan Apresiasimu":"Terima kasih bg zahdi, sudah membantu penyelesaian SPJ kegiatan kegiatan di tim produksi","NIP":"340017527"},{"Pengirim":"-","Penerima":"Mardian Zahdi, A.Md.","Tuliskan Apresiasimu":"Terimakasih Zahdi sudah bantu dalam melengkapi berkas administrasi kegiatan survei.","NIP":"340017527"},{"Pengirim":"-","Penerima":"Mardian Zahdi, A.Md.","Tuliskan Apresiasimu":"Makasih CEO ahli SPJ, luar biasa tiada tandingannya 💪","NIP":"340017527"},{"Pengirim":"-","Penerima":"Mardian Zahdi, A.Md.","Tuliskan Apresiasimu":"Terimakasih banyak Zahdi, telah membantu dan bekerjasama dalam kegiatan sya di bps selama ini","NIP":"340017527"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Mardian Zahdi, A.Md.","Tuliskan Apresiasimu":"Makasih bang la bantu2 belajar bendahara, walaupun jawaban e lebih galek \"ku la lupa tiara\" wkwkwk","NIP":"340017527"},{"Pengirim":"-","Penerima":"Muhammad Al Fiqrie, S.Tr.Stat.","Tuliskan Apresiasimu":"Kerjaan banyakkk tapi semoga tetap semangat saling bantu, makasih Fiq 💪","NIP":"340060211"},{"Pengirim":"-","Penerima":"Muhammad Al Fiqrie, S.Tr.Stat.","Tuliskan Apresiasimu":"Teman-teman semua, saya benar-benar ingin mengucapkan terima kasih yang sebesar-besarnya. Saya tahu perjalanan kita tidak selalu mudah, kadang capek, kadang penuh tekanan, bahkan ada momen yang bikin kita harus ekstra sabar. Saya sangat menghargai setiap usaha, tenaga, dan waktu yang kalian curahkan. Jujur saya bangga bisa satu tim dengan kalian, karena kekompakan dan semangat kalian itu luar biasa.","NIP":"340060211"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Muhammad Al Fiqrie, S.Tr.Stat.","Tuliskan Apresiasimu":"Tunjukan kinerja mu... Kadang tempat atau lingkungan yang bisa membentuk Kinerja kita. So Kita harus hijrah dari tempat yang tak nyaman dan tak memberikan kita untuk berkinerja baik. \n\nKeep Spirit Broo...","NIP":"340060211"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Muhammad Firdaus, SE, M.A.P.","Tuliskan Apresiasimu":"Terimakasih atas motivasi dan bantuan yg telah diberikan, semoga selalu bisa bekerja sama dengan bang fir, jangan lupa OTP nya","NIP":"340017159"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Muhammad Firdaus, SE, M.A.P.","Tuliskan Apresiasimu":"Semangat bg Fir... \nuntuk bergerak memajukan TU Bangka bareng.... hhehehehe\nmaaf selalu membebani... hehheheh ","NIP":"340017159"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Muhammad Firdaus, SE, M.A.P.","Tuliskan Apresiasimu":"Pak minta bimbingannya ya buat tugas-tugas di TU. Thank uu juga udah nge back up kerjaan waktu awal-awal pindah.","NIP":"340017159"},{"Pengirim":"-","Penerima":"Nia Anggraini Rozama, SST.","Tuliskan Apresiasimu":"Terimakasih banyak Bu Nia atas bantuannya yang sangat berarti di saat acara buka puasa bersama BPS kabupaten Bangka ","NIP":"340055861"},{"Pengirim":"Budi Utama, SST.","Penerima":"Nia Anggraini Rozama, SST.","Tuliskan Apresiasimu":"Terima kasih kepada bu nia, sudah membantu dalam membackup kegiatan statistik produksi, terutama sebagai penanggung jawab di beberapa survei..","NIP":"340055861"},{"Pengirim":"-","Penerima":"Nia Anggraini Rozama, SST.","Tuliskan Apresiasimu":"Terimakasih Nia, sudah bantu dalam melengkapi berkas administrasi  untuk pencairan honor kegiatan","NIP":"340055861"},{"Pengirim":"-","Penerima":"Nia Anggraini Rozama, SST.","Tuliskan Apresiasimu":"Terimakasih Nia, sudah banyak membantu serta berbagi ilmu kepada saya dalam kegiatan bps selama ini.sehat dan sukses selalu bu Nia.","NIP":"340055861"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Nia Anggraini Rozama, SST.","Tuliskan Apresiasimu":"Bu, thank uu ya udah jadi temen ngobrol ku. Sejujurnya ku suka banget kalau ngobrol-ngobrol kayak gitu. Apalgi kalau ada info-info terbaru🤐🤐Btw lanjutin lagi dong program olahraga kita ni. Ada target yang harus dicapai ni wkwkwk.","NIP":"340055861"},{"Pengirim":"-","Penerima":"Novi","Tuliskan Apresiasimu":"Terima kasi yuk Nopi sudah membantu selama ini","NIP":"novi"},{"Pengirim":"-","Penerima":"Novi","Tuliskan Apresiasimu":"Terimakasih bu Novi atas bantuannya dalam kegiatan di kantor BPS.","NIP":"novi"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Novi","Tuliskan Apresiasimu":"Terimakasih la bantu tiara nyiapin konsumsi yuk","NIP":"novi"},{"Pengirim":"-","Penerima":"Pratama Maesza, SST, M.Han.","Tuliskan Apresiasimu":"Terimakasih pak Maeza yang sudah pengertian untuk kegiatan yang saya ikuti selama ini","NIP":"340050197"},{"Pengirim":"-","Penerima":"Pratama Maesza, SST, M.Han.","Tuliskan Apresiasimu":"Terimakasih pak Maesza atas bimbingan dan pengertiannya dalam kegiatan PSS.","NIP":"340050197"},{"Pengirim":"-","Penerima":"Raja Saiban, S.Tr.Stat.","Tuliskan Apresiasimu":"Terimakasih Iban sudah menjadi MC saat buka puasa kemarin ","NIP":"340063463"},{"Pengirim":"Berlian Sitorus, S.Si, M.E.","Penerima":"Raja Saiban, S.Tr.Stat.","Tuliskan Apresiasimu":"Trims atas kerjasamanya. Good job","NIP":"340063463"},{"Pengirim":"-","Penerima":"Raja Saiban, S.Tr.Stat.","Tuliskan Apresiasimu":"Jangan mati dulu yahh","NIP":"340063463"},{"Pengirim":"-","Penerima":"Raja Saiban, S.Tr.Stat.","Tuliskan Apresiasimu":"Makasih Iban untuk kerja samanya, tetap semangat utk kita songsong 2026 ini 💪","NIP":"340063463"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Ruli Ikhwani, SE.","Tuliskan Apresiasimu":"Terimakasih bang la kasih tiara DL tahun kemarin","NIP":"340020407"},{"Pengirim":"Santy Fajaria, SST, MT.","Penerima":"Sadespan, S.E.","Tuliskan Apresiasimu":"Terimakasih sudah memberikan kinerja yang baik di tim PTI","NIP":"340054765"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Sadespan, S.E.","Tuliskan Apresiasimu":"Terimakasih atas kerjasama yg baik dengan abang selama 2 tahun ini, semangaaatt","NIP":"340054765"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Santy Fajaria, SST, MT.","Tuliskan Apresiasimu":"Bu thank u ya udah jadi partner selama ZI hehehe. Makasih juga udah back up beberapa dokumen untuk ZI dan jadi coach untuk program CAN. Audrey minta maaf ya kalau ada salah-salah.","NIP":"340050239"},{"Pengirim":"-","Penerima":"Sisca Safutri Dalimunthe, SE.","Tuliskan Apresiasimu":"Makasih mak panggung kita, buka bersama jadi lancar dengan kegesitanmu 🫰🫰","NIP":"340020405"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Sisca Safutri Dalimunthe, SE.","Tuliskan Apresiasimu":"Terimakasih atas ilmu2 yang ayuk berikan, semoga selalu bisa bekerja sama dengan baik, semangat menyusun LK","NIP":"340020405"},{"Pengirim":"-","Penerima":"Sisca Safutri Dalimunthe, SE.","Tuliskan Apresiasimu":"Teman-teman semua, saya benar-benar ingin mengucapkan terima kasih yang sebesar-besarnya. Saya tahu perjalanan kita tidak selalu mudah, kadang capek, kadang penuh tekanan, bahkan ada momen yang bikin kita harus ekstra sabar. Saya sangat menghargai setiap usaha, tenaga, dan waktu yang kalian curahkan. Jujur saya bangga bisa satu tim dengan kalian, karena kekompakan dan semangat kalian itu luar biasa.","NIP":"340020405"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Sisca Safutri Dalimunthe, SE.","Tuliskan Apresiasimu":"Paling suka kalo Bu Sis udah jadi mak panggung, gercep banget, best emang😅😅","NIP":"340020405"},{"Pengirim":"Santy Fajaria, SST, MT.","Penerima":"Sri Hapsari Murni Handayani, SST., M.Stat.","Tuliskan Apresiasimu":"Terimakasih sudah memberikan arahan dan motivasi bagi kami untuk bekerja dan berkinerja yang baik","NIP":"340016470"},{"Pengirim":"Ruli Ikhwani, SE.","Penerima":"Sri Hapsari Murni Handayani, SST., M.Stat.","Tuliskan Apresiasimu":"Trimakasih atas support dan kepercayaannya kepada kami walaupun ditengah keterbatasan kemampuan kami ibu selalu memberikan semangat untuk terus belajar dan berusaha","NIP":"340016470"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Sri Hapsari Murni Handayani, SST., M.Stat.","Tuliskan Apresiasimu":"Terimakasih bu atas arahan dan kebaikan yg telah diberikan","NIP":"340016470"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Sri Hapsari Murni Handayani, SST., M.Stat.","Tuliskan Apresiasimu":"Bu terima kasih ya Bu untuk bantuannya selama ZI. Audrey juga mau minta maaf kalo ada salah kata atau lama balas chat Ibu😅","NIP":"340016470"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Suhairiyantono, SE.","Tuliskan Apresiasimu":"Bapak semangat untuk terus bersama memberikan yang terbaik untuk BPS Bangka, tempat kita berjuang dalam mencari nafkah.... hehheheh","NIP":"340019854"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Suhairiyantono, SE.","Tuliskan Apresiasimu":"Terimakasih pak atas jamuan2 yg la bapak dan ibu berikan","NIP":"340019854"},{"Pengirim":"Ruli Ikhwani, SE.","Penerima":"Suratno, S. Mn.","Tuliskan Apresiasimu":"Terimakasih atas nasehat bantuan dan dorongan serta kesetiaan untuk selalu bekerja bersama sama dalam menyelesaikan seluruh tanggung jawab pekerjaan di tim distribusi","NIP":"340019792"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Suratno, S. Mn.","Tuliskan Apresiasimu":"Terimakasih pak atas jamuan2 yg bapak dan ibu berikan, mantul ayem kampung bapak","NIP":"340019792"},{"Pengirim":"Filmon Kharismartin Silaen, A.Md.Stat.","Penerima":"Tiara Guslendra, A.Md.Stat","Tuliskan Apresiasimu":"Terima kasih THR luar biasanya kak Tiara. Keren banget uyey. Semoga tahun depan jadi 2 kali lipat😄","NIP":"340060432"},{"Pengirim":"Budi Utama, SST.","Penerima":"Tiara Guslendra, A.Md.Stat","Tuliskan Apresiasimu":"Terima kasih ibu bendahara, sudah membantu dalam pencairan anggaran statistik produksi serta memberikan pengertian dispensasi saat pencairan honor mitra sebelum idul fitri","NIP":"340060432"},{"Pengirim":"-","Penerima":"Tiara Guslendra, A.Md.Stat","Tuliskan Apresiasimu":"Terimakasih banyak tiara atas kerja kerasnya membantu pencairan kami terutama dari tim sosial","NIP":"340060432"},{"Pengirim":"Suratno, S. Mn.","Penerima":"Tiara Guslendra, A.Md.Stat","Tuliskan Apresiasimu":"Makasih ya ..udah di transpert.","NIP":"340060432"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Tiara Guslendra, A.Md.Stat","Tuliskan Apresiasimu":"Tetap cairkan,,, apapun yang terjadi. Terimakasih selalu memberikan berita baik ketika ada notice,,,BRIMooooooo\n\nSemangat,,,kadang orang tidak mengerti apa yang kita kerjakan, karena meraka belom benar2 merasa diposisi ini....","NIP":"340060432"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Tiara Guslendra, A.Md.Stat","Tuliskan Apresiasimu":"Kak thank u ya mau jadi coach buat program ku, walaupun dak tau ngapain wkwkwkw. Thnak uu juga jadi temen ngakak dan karoke selama di TU wwkwkk. Best emang❤️❤️","NIP":"340060432"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Wahyu Parmonangan Akbar, SST.","Tuliskan Apresiasimu":"Terimakasih atas segala apresiasi yang abang berikan kepada kami, semangaaat bapak kasubbag","NIP":"340057638"},{"Pengirim":"Yosefpriyanto S.Tr.Stat., S.E.","Penerima":"Wahyu Parmonangan Akbar, SST.","Tuliskan Apresiasimu":"Terima kasih sudah bekerja keras membuat kantor ini menjadi disiplin","NIP":"340057638"},{"Pengirim":"Muhammad Al Fiqrie, S.Tr.Stat.","Penerima":"Wahyu Parmonangan Akbar, SST.","Tuliskan Apresiasimu":"Terimakasih atas dukungan dan bantuan dalam setiap pekerjaan di kantor dan juga di luar kantor, terutama dukungan untuk mengikuti tugas belajar 🫡","NIP":"340057638"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Wahyu Parmonangan Akbar, SST.","Tuliskan Apresiasimu":"Bang thank u ya atas advice-advice di dunia perkantoran ini wkwkwk. Sejujurnya ku agak sedih waktu ditarik jadi tim umum karena harus belajar dari 0 kayak waktu awal penempatan. Tapi ternyata seru juga disini karena lebih bebas ngapa-ngapain wkwk.","NIP":"340057638"},{"Pengirim":"Tiara Guslendra, A.Md.Stat","Penerima":"Yosefpriyanto S.Tr.Stat., S.E.","Tuliskan Apresiasimu":"Terimakasih telah mengambil alih \"panitia\" di 2026, sangat terbantu sekali","NIP":"340020404"},{"Pengirim":"Wahyu Parmonangan Akbar, SST.","Penerima":"Yosefpriyanto S.Tr.Stat., S.E.","Tuliskan Apresiasimu":"Abg pasti bisa untuk terus bekinerja jauh lebih baik lagi...\nTetap semangat untuk terus memperbaiki diri, dengan begitu Penilaian orang Bangka pasti akan berubah kearah yang postif.... \n\ntetap Semangat Tholaba...","NIP":"340020404"},{"Pengirim":"Audrey, A.Md.Stat.","Penerima":"Yosefpriyanto S.Tr.Stat., S.E.","Tuliskan Apresiasimu":"Thank uu dah back up beberapa kerjaan TU bg, terutama jadi panitia wkwkwk","NIP":"340020404"}];
+
+// ─── STATE ──────────────────────────────────────────────
+let messages = [];
+let currentIdx = 0;
+let opened = false;
+
+// ─── DOM REFS ────────────────────────────────────────────
+const nipInput      = document.getElementById('nipInput');
+const envWrap       = document.getElementById('envelope-wrap');
+const envHint       = document.getElementById('envHint');
+const letterPanel   = document.getElementById('letter-panel');
+const recipientName = document.getElementById('recipientName');
+const msgText       = document.getElementById('msgText');
+const msgSender     = document.getElementById('msgSender');
+const counter       = document.getElementById('counter');
+const dotsEl        = document.getElementById('dots');
+
+// ─── NIP INPUT ───────────────────────────────────────────
+nipInput.addEventListener('input', () => {
+  const nip = nipInput.value.trim().toLowerCase();
+  const found = DATA.filter(d => String(d.NIP).toLowerCase() === nip);
+  if (found.length > 0) {
+    envWrap.classList.add('can-open');
+    envHint.textContent = `✨ Ada ${found.length} surat untukmu! Klik amplop untuk membuka.`;
+    if (opened) resetToEnvelope();
+  } else {
+    envWrap.classList.remove('can-open');
+    envHint.textContent = nip ? 'NIP tidak ditemukan 😔' : 'Masukkan NIP untuk membuka surat ✨';
+    if (opened) resetToEnvelope();
+  }
+  opened = false;
+  messages = found;
+  currentIdx = 0;
+});
+
+function resetToEnvelope() {
+  letterPanel.style.display = 'none';
+  envWrap.style.display = 'flex';
+  envHint.style.opacity = '1';
+  envWrap.classList.remove('opening');
+  opened = false;
+}
+
+// ─── OPEN ENVELOPE ───────────────────────────────────────
+function tryOpen() {
+  if (!envWrap.classList.contains('can-open')) return;
+  if (opened) return;
+  opened = true;
+
+  envWrap.classList.add('opening');
+
+  setTimeout(() => {
+    envWrap.style.display = 'none';
+    envHint.style.opacity = '0';
+    letterPanel.style.display = 'flex';
+    renderMessage();
+  }, 900);
+}
+
+// ─── RENDER MESSAGE ──────────────────────────────────────
+function renderMessage() {
+  if (!messages.length) return;
+  const m = messages[currentIdx];
+
+  recipientName.textContent = m.Penerima;
+  msgText.textContent = m['Tuliskan Apresiasimu'];
+  msgSender.textContent = m.Pengirim === '-' ? 'Anonim' : m.Pengirim;
+  counter.textContent = `${currentIdx + 1} / ${messages.length}`;
+
+  // dots
+  dotsEl.innerHTML = '';
+  const maxDots = Math.min(messages.length, 8);
+  for (let i = 0; i < maxDots; i++) {
+    const d = document.createElement('span');
+    d.className = 'dot' + (i === currentIdx % maxDots ? ' active' : '');
+    dotsEl.appendChild(d);
+  }
+
+  // re-trigger animation
+  const lc = document.querySelector('.letter-card');
+  lc.style.animation = 'none';
+  void lc.offsetWidth;
+  lc.style.animation = 'fadeMsg .4s ease';
+}
+
+function nextMsg() {
+  if (!messages.length) return;
+  currentIdx = (currentIdx + 1) % messages.length;
+  renderMessage();
+}
+
+function prevMsg() {
+  if (!messages.length) return;
+  currentIdx = (currentIdx - 1 + messages.length) % messages.length;
+  renderMessage();
+}
+</script>
+</body>
+</html>
